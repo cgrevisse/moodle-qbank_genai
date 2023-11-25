@@ -26,3 +26,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Generative AI Question Bank';
+
+$string['title'] = 'Generate questions';
+
+$string['openaiapikey'] = 'OpenAI API key';
+$string['openaiapikeydesc'] = 'To be created at <a href="https://platform.openai.com/api-keys" target="_blank">https://platform.openai.com/api-keys</a>.';

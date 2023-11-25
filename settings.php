@@ -29,6 +29,11 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('qbank_genai_settings', new lang_string('pluginname', 'qbank_genai'));
 
     if ($ADMIN->fulltree) {
-        // TODO: OpenAI API key
+        $settings->add(new admin_setting_configpasswordunmask(
+            'qbank_genai/openaiapikey',
+            get_string('openaiapikey', 'qbank_genai'),
+            get_string('openaiapikeydesc', 'qbank_genai'),
+            '',
+        ));
     }
 }
