@@ -49,6 +49,9 @@ echo $OUTPUT->header();
 
 echo $OUTPUT->heading(get_string('title', 'qbank_genai'));
 
+/*
+// Get all resources from course
+
 $info = get_fast_modinfo($course);
 $resources = $info->instances['resource'];
 
@@ -64,7 +67,10 @@ foreach ($resources as $resource) {
         echo "$resource->name | Visible: $resource->visible | File name: {$file->get_filename()} | File path: $path<hr>";
     }
 }
+*/
 
+/*
+// Extract text from PDF
 
 require_once($CFG->dirroot . '/question/bank/genai/vendor/autoload.php');
 
@@ -76,11 +82,81 @@ $pdf = $parser->parseFile($path);
 $text = $pdf->getText();
 
 echo html_writer::tag('blockquote', $text);
+*/
 
+/*
+// Get OpenAI API key from plugin settings
 
 $openaiapikey = get_config('qbank_genai', 'openaiapikey');
 if (!empty($openaiapikey)) {
     echo "OpenAI API key: '$openaiapikey'";
 }
+*/
+
+/*
+// Test MCQ data
+
+$mcq->id = 0;
+$mcq->category = 0;
+$mcq->idnumber = null;
+$mcq->contextid = 0;
+$mcq->parent = 0;
+
+$mcq->questiontextformat = FORMAT_HTML;
+$mcq->generalfeedbackformat = FORMAT_HTML;
+$mcq->defaultmark = 1;
+$mcq->penalty = 0;
+$mcq->length = 1;
+$mcq->stamp = make_unique_id_code();
+$mcq->status = \core_question\local\bank\question_version_status::QUESTION_STATUS_READY;
+$mcq->version = 1;
+$mcq->timecreated = time();
+$mcq->timemodified = time();
+$mcq->createdby = $USER->id;
+$mcq->modifiedby = $USER->id;
+
+$mcq->name = 'GenAI-001';
+$mcq->questiontext = 'What is the capital of France?';
+$mcq->generalfeedback = '';
+$mcq->qtype = "qtype_multichoice"; // question_bank::get_qtype('multichoice');
+
+$mcq->shuffleanswers = 1;
+$mcq->answernumbering = 'abc';
+$mcq->showstandardinstruction = 0;
+
+$mcq->answers = [
+    0 => new question_answer(0, 'Paris', 1, '', FORMAT_HTML),
+    1 => new question_answer(1, 'Marseille', 0, '', FORMAT_HTML),
+    2 => new question_answer(2, 'Strasbourg', 0, '', FORMAT_HTML),
+    3 => new question_answer(3, 'Lyon', 0, '', FORMAT_HTML),
+];
+*/
+
+/*
+// Programmatic way of creating question category and adding MCQ
+
+require_once($CFG->dirroot. '/question/bank/genai/helper.php');
+
+$questiondata = get_multichoice_question_data();
+$formdata = get_multichoice_question_form_data();
+
+$category = create_question_category($context->id);
+
+$formdata->category = "{$category->id},{$category->contextid}";
+
+
+require_once($CFG->dirroot. '/question/type/edit_question_form.php');
+require_once($CFG->dirroot. '/question/type/multichoice/edit_multichoice_form.php');
+qtype_multichoice_edit_form::mock_submit((array)$formdata);
+
+$form = get_question_editing_form($category, $questiondata);
+
+assert($form->is_validated());
+
+$fromform = $form->get_data();
+
+$qtype = new qtype_multichoice();
+$qtype->save_question($questiondata, $fromform);
+*/
 
 echo $OUTPUT->footer();
