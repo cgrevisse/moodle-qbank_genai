@@ -159,4 +159,14 @@ $qtype = new qtype_multichoice();
 $qtype->save_question($questiondata, $fromform);
 */
 
+/*
+// Task API for asynchronous jobs
+
+$task = \qbank_genai\task\generation_task::instance(42, "Dale!", $USER->id);
+\core\task\manager::queue_adhoc_task($task); // add true to avoid duplicates
+
+$existingtasks = $DB->get_records('task_adhoc', ['userid' => $USER->id, 'component' => 'qbank_genai']);
+print_object($existingtasks);
+*/
+
 echo $OUTPUT->footer();

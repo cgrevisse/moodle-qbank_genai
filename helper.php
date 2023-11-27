@@ -18,7 +18,7 @@
  * TODO describe file helper
  *
  * @package    qbank_genai
- * @copyright  2023 YOUR NAME <your@email.com>
+ * @copyright  2023 Christian Grévisse <christian.grevisse@uni.lu>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
