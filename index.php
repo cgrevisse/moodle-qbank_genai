@@ -169,4 +169,11 @@ $existingtasks = $DB->get_records('task_adhoc', ['userid' => $USER->id, 'compone
 print_object($existingtasks);
 */
 
+/*
+// Event API
+
+$event = \qbank_genai\event\generation_launched::create(['context' => $context, 'other' => ["foo" => 42]]);
+$event->trigger();
+*/
+
 echo $OUTPUT->footer();
