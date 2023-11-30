@@ -25,6 +25,8 @@
 require('../../../config.php');
 require_once($CFG->dirroot. '/question/bank/genai/lib.php');
 
+require_once($CFG->dirroot . '/question/bank/genai/vendor/autoload.php');
+
 $courseid = required_param('courseid', PARAM_INT);
 
 $url = new moodle_url('/question/bank/genai/index.php', ['courseid' => $courseid]);
@@ -73,8 +75,6 @@ foreach ($resources as $resource) {
 /*
 // Extract text from PDF
 
-require_once($CFG->dirroot . '/question/bank/genai/vendor/autoload.php');
-
 $parser = new \Smalot\PdfParser\Parser();
 
 raise_memory_limit(MEMORY_HUGE);
@@ -90,7 +90,7 @@ echo html_writer::tag('blockquote', $text);
 
 $openaiapikey = get_config('qbank_genai', 'openaiapikey');
 if (!empty($openaiapikey)) {
-    echo "OpenAI API key: '$openaiapikey'";
+    //echo "OpenAI API key: '$openaiapikey'";
 }
 */
 
@@ -203,6 +203,21 @@ if ($fromform = $mform->get_data()) {
    
     $mform->display();
 }
+*/
+
+/*
+// Basic usage of OpenAI API Client (https://github.com/openai-php/client)
+
+$client = OpenAI::client($openaiapikey);
+
+$result = $client->chat()->create([
+    'model' => 'gpt-4',
+    'messages' => [
+        ['role' => 'user', 'content' => 'What is the Collège de France?'],
+    ],
+]);
+
+echo $result->choices[0]->message->content;
 */
 
 echo $OUTPUT->footer();
