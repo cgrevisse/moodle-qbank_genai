@@ -25,10 +25,11 @@
 require('../../../config.php');
 require_once($CFG->dirroot. '/question/bank/genai/lib.php');
 
-$url = new moodle_url('/question/bank/genai/index.php');
+$courseid = required_param('courseid', PARAM_INT);
+
+$url = new moodle_url('/question/bank/genai/index.php', ['courseid' => $courseid]);
 $PAGE->set_url($url);
 
-$courseid = required_param('courseid', PARAM_INT);
 $course = get_course($courseid);
 
 require_login($course);
@@ -174,6 +175,34 @@ print_object($existingtasks);
 
 $event = \qbank_genai\event\generation_launched::create(['context' => $context, 'other' => ["foo" => 42]]);
 $event->trigger();
+*/
+
+/*
+// Forms API
+
+require_once($CFG->dirroot. '/question/bank/genai/classes/form/generation_form.php');
+
+$dummydata = [
+    ["id" => 42, "name" => "Introduction", "visible" => true, "path" => "Introduction.pdf"],
+    ["id" => 16, "name" => "Processes", "visible" => false, "path" => "Processes.pdf"],
+];
+
+$mform = new \qbank_genai\form\generation_form($url, $dummydata);
+
+if ($fromform = $mform->get_data()) {
+    // When the form is submitted, and the data is successfully validated, the `get_data()` function will return the data posted in the form.
+
+    var_dump($fromform);
+
+    //redirect($PAGE->url);
+} else {
+    // This branch is executed if the form is submitted but the data doesn't validate and the form should be redisplayed or on the first display of the form.
+   
+    // Set default data (if any).
+    //$mform->set_data(["email" => ""]);
+   
+    $mform->display();
+}
 */
 
 echo $OUTPUT->footer();
