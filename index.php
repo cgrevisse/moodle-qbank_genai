@@ -25,7 +25,7 @@
 use qbank_genai\task\generation_task;
 
 require('../../../config.php');
-require_once($CFG->dirroot. '/question/bank/genai/lib.php');
+require_once($CFG->dirroot.'/question/bank/genai/lib.php');
 
 $courseid = required_param('courseid', PARAM_INT);
 
@@ -52,36 +52,37 @@ echo $OUTPUT->header();
 
 echo $OUTPUT->heading(get_string('title', 'qbank_genai'));
 
-// Check for OpenAI API key
+// Check for OpenAI API key.
 $openaiapikey = get_config('qbank_genai', 'openaiapikey');
 if (empty($openaiapikey)) {
     echo html_writer::tag('div', get_string('noopenaiapikey', 'qbank_genai'), ['class' => 'alert alert-warning']);
 }
 
-// Show ongoing generation tasks (if any)
+// Show ongoing generation tasks (if any).
 $existingtasks = $DB->get_records('task_adhoc', ['userid' => $USER->id, 'component' => 'qbank_genai']);
 if (!empty($existingtasks)) {
-    
+
     echo html_writer::start_tag('div', ['class' => 'alert alert-info']);
     echo html_writer::tag('p', get_string('ongoingtasks', 'qbank_genai'));
     echo html_writer::start_tag('ul');
 
     foreach ($existingtasks as $task) {
         echo html_writer::start_tag('li');
-        echo html_writer::tag('span', format_text(get_resource_names_string(json_decode($task->customdata)->resources), FORMAT_PLAIN));
+        $resourcenames = get_resource_names_string(json_decode($task->customdata)->resources);
+        echo html_writer::tag('span', format_text($resourcenames, FORMAT_PLAIN));
         echo html_writer::tag('small', userdate($task->timecreated), ['class' => 'text-muted ml-2']);
     }
-    
+
     echo html_writer::end_tag('li');
     echo html_writer::end_tag('ul');
     echo html_writer::end_tag('div');
 
 }
 
-// Get course resources
+// Get course resources.
 $resources = get_course_resources($course);
 
-// Form handling
+// Form handling.
 $mform = new \qbank_genai\form\generation_form($url, $resources);
 
 if ($fromform = $mform->get_data()) {
@@ -93,27 +94,28 @@ if ($fromform = $mform->get_data()) {
         }
     }
 
-    $selected_resources = [];
-    
+    $selectedresources = [];
+
     foreach ($resources as $resource) {
         if (in_array($resource->id, $ids)) {
-            $selected_resources[] = (object) [
+            $selectedresources[] = (object) [
                 "id" => $resource->id,
                 "name" => $resource->name,
                 "visible" => $resource->visible,
             ];
         }
     }
-    
-    // Launch generation task
-    $task = \qbank_genai\task\generation_task::instance($selected_resources, $USER->id, $context->id);
-    \core\task\manager::queue_adhoc_task($task); // add true to avoid duplicates
 
-    // Log generation task launched
+    // Launch generation task.
+    $task = \qbank_genai\task\generation_task::instance($selectedresources, $USER->id, $context->id);
+    \core\task\manager::queue_adhoc_task($task); // Add true to avoid duplicates.
+
+    // Log generation task launched.
     $event = \qbank_genai\event\generation_launched::create(['context' => $context, 'other' => ["ids" => $ids]]);
     $event->trigger();
 
-    // Redirect to this page again (seems to interfere with mtrace in adhoc task ...). Also, consider redirecting before any $OUTPUT->...
+    // Redirect to this page again (seems to interfere with mtrace in adhoc task ...).
+    // Also, consider redirecting before any $OUTPUT->...
     redirect($PAGE->url);
 } else {
     $mform->display();

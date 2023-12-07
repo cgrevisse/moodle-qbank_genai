@@ -23,7 +23,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once($CFG->libdir . '/questionlib.php'); // get_next_version
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->libdir.'/questionlib.php'); // Needed for get_next_version().
 
 /**
  * Defines the necessary capabilities for this plugin.
@@ -55,7 +57,7 @@ function qbank_genai_extend_navigation_course(navigation_node $navigation, stdCl
 
 /**
  * Get all resources of a course.
- * 
+ *
  * @param stdClass $course The course
  * @return cm_info[] The resources
  */
@@ -66,8 +68,8 @@ function get_course_resources(stdClass $course) {
 
 /**
  * Get the name, extension and path on the file storage for the first file associated to a resource (if any).
- * 
- * @param int The ID of the resource
+ *
+ * @param int $resourceid The ID of the resource
  * @return stdClass The file info
  */
 function get_fileinfo_for_resource(int $resourceid) {
@@ -93,12 +95,12 @@ function get_fileinfo_for_resource(int $resourceid) {
 
 /**
  * Generate questions about the given text
- * 
+ *
  * @param string $text The text
  * @param string $apikey OpenAI API key
  */
 function generate_questions(string $text, string $apikey) {
-    // TODO: LLM-based question generation
+    // TODO: LLM-based question generation.
 
     /*
     // Basic usage of OpenAI API Client (https://github.com/openai-php/client)
@@ -113,30 +115,28 @@ function generate_questions(string $text, string $apikey) {
     ]);
 
     echo $result->choices[0]->message->content;
-
     */
 }
 
 /**
  * Creates a new question category in the question bank of the given course. Adapted from /question/tests/generator/lib.php.
- * 
+ *
  * @param int $courseid The ID of the course
- * @param string $name The name of the question category to be created
- * @param string $resource_description The description about the resources for which questions are generated
+ * @param string $resourcedescription The description about the resources for which questions are generated
  * @return stdClass Record of the new question category
  */
-function create_question_category(int $courseid, string $resource_description) {
+function create_question_category(int $courseid, string $resourcedescription) {
     global $DB;
 
     $record = [
         'name'       => 'GenAI ('.date('d/m/Y H:i:s').')',
-        'info'       => 'Generative AI-based questions on: '.format_string($resource_description),
+        'info'       => 'Generative AI-based questions on: '.format_string($resourcedescription),
         'infoformat' => FORMAT_HTML,
         'stamp'      => make_unique_id_code(),
         'sortorder'  => 999,
         'idnumber'   => null,
         'contextid'  => $courseid,
-        'parent'     => question_get_top_category($courseid, true)->id
+        'parent'     => question_get_top_category($courseid, true)->id,
     ];
 
     $record['id'] = $DB->insert_record('question_categories', $record);
@@ -145,7 +145,7 @@ function create_question_category(int $courseid, string $resource_description) {
 
 /**
  * Returns a comma-separated string representation of all resource names.
- * 
+ *
  * @param stdClass[] $resources Array of resources
  * @return string The description string
  */
@@ -154,13 +154,14 @@ function get_resource_names_string($resources) {
 }
 
 /**
- * Programmatically create an MCQ question. 
- * 
- * Based on code from save_question() in /question/type/questiontypebase.php and save_question_options() /question/type/multichoice/questiontype.php.
- * 
+ * Programmatically create an MCQ question.
+ *
+ * Based on code from save_question() in /question/type/questiontypebase.php
+ * and save_question_options() /question/type/multichoice/questiontype.php.
+ *
  * @param string $name The question name
  * @param stdClass $question The MCQ data
- * $param stdClass $category Information about the category and context
+ * @param stdClass $category Information about the category and context
  */
 function create_question(string $name, stdClass $question, stdClass $category) {
     global $USER, $DB;
@@ -176,7 +177,7 @@ function create_question(string $name, stdClass $question, stdClass $category) {
     $qdata->length = 1;
     $qdata->defaultmark = 1;
     $qdata->penalty = 0;
-    $qdata->questiontext = $question->stem; // TODO: Cleanse
+    $qdata->questiontext = $question->stem; // TODO: Cleanse.
     $qdata->questiontextformat = FORMAT_HTML;
     $qdata->generalfeedback = '';
     $qdata->generalfeedbackformat = FORMAT_HTML;
@@ -189,17 +190,17 @@ function create_question(string $name, stdClass $question, stdClass $category) {
     $qdata->timemodified = $t;
     $qdata->idnumber = null;
 
-    // Create a record for the question
+    // Create a record for the question.
     $qdata->id = $DB->insert_record('question', $qdata);
 
-    // Create a record for the question bank entry
+    // Create a record for the question bank entry.
     $questionbankentry = new stdClass();
     $questionbankentry->questioncategoryid = $category->id;
     $questionbankentry->idnumber = $qdata->idnumber;
     $questionbankentry->ownerid = $qdata->createdby;
     $questionbankentry->id = $DB->insert_record('question_bank_entries', $questionbankentry);
 
-    // Create a record for the question versions
+    // Create a record for the question versions.
     $questionversion = new stdClass();
     $questionversion->questionbankentryid = $questionbankentry->id;
     $questionversion->questionid = $qdata->id;
@@ -207,11 +208,11 @@ function create_question(string $name, stdClass $question, stdClass $category) {
     $questionversion->status = \core_question\local\bank\question_version_status::QUESTION_STATUS_READY;
     $questionversion->id = $DB->insert_record('question_versions', $questionversion);
 
-    // Answers
+    // Create answer records.
     foreach ($question->answers as $a) {
         $answer = new stdClass();
         $answer->question = $qdata->id;
-        $answer->answer = $a->text; // TODO: Cleanse
+        $answer->answer = $a->text; // TODO: Cleanse.
         $answer->answerformat = FORMAT_HTML;
         $answer->feedback = '';
         $answer->feedbackformat = FORMAT_HTML;
@@ -219,7 +220,7 @@ function create_question(string $name, stdClass $question, stdClass $category) {
         $answer->id = $DB->insert_record('question_answers', $answer);
     }
 
-    // Question options
+    // Question a record for the question's options.
     $options = new stdClass();
     $options->questionid = $qdata->id;
     $options->correctfeedback = '';
@@ -231,15 +232,15 @@ function create_question(string $name, stdClass $question, stdClass $category) {
     $options->single = 1;
     $options->shuffleanswers = 1;
     $options->answernumbering = 'abc';
-    $options->showstandardinstruction =1;
+    $options->showstandardinstruction = 1;
     $options->shownumcorrect = 1;
     $options->id = $DB->insert_record('qtype_multichoice_options', $options);
 
-    // Log the creation of this question
+    // Log the creation of this question.
     $context = \context::instance_by_id($category->contextid, IGNORE_MISSING);
     $event = \core\event\question_created::create_from_question_instance($qdata, $context);
     $event->trigger();
 
-    // Commit transaction
+    // Commit the transaction.
     $transaction->allow_commit();
 }

@@ -16,12 +16,13 @@
 
 namespace qbank_genai\task;
 
-require_once($CFG->dirroot. '/question/bank/genai/lib.php');
-require_once($CFG->dirroot. '/question/bank/genai/classes/handler/handler.php');
-require_once($CFG->dirroot . '/question/bank/genai/vendor/autoload.php');
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->dirroot.'/question/bank/genai/lib.php');
+require_once($CFG->dirroot.'/question/bank/genai/classes/handler/handler.php');
+require_once($CFG->dirroot.'/question/bank/genai/vendor/autoload.php');
 
 use qbank_genai\handler\HandlerRegistry;
-use stdClass;
 
 /**
  * Class generation_task
@@ -32,6 +33,15 @@ use stdClass;
  */
 class generation_task extends \core\task\adhoc_task {
 
+    /**
+     * Factory method for this class
+     *
+     * @param array $resources The selected resources for which questions shall be generated
+     * @param int $userid The user who started the task
+     * @param int $contextid The context ID (needed for the question bank category)
+     *
+     * @return static the singleton instance
+     */
     public static function instance(array $resources, int $userid, int $contextid) {
         $task = new self();
         $task->set_custom_data((object) [
@@ -43,6 +53,10 @@ class generation_task extends \core\task\adhoc_task {
         return $task;
     }
 
+    /**
+     * This method implements the question generation by 1) extracting text from the selected resources; 2) generating
+     * questions via an LLM; and 3) programmatically add the questions in a newly created question bank category.
+     */
     public function execute() {
         $openaiapikey = get_config('qbank_genai', 'openaiapikey');
         if (empty($openaiapikey)) {
@@ -56,22 +70,22 @@ class generation_task extends \core\task\adhoc_task {
         foreach ($data->resources as $resource) {
             // 1. Extract text from PDF
             $file = get_fileinfo_for_resource($resource->id);
-        
+
             $handler = HandlerRegistry::get_registry()->get_handler($file->extension);
-        
+
             if ($handler != null) {
-                //$text = $handler->extract_text($file);
+                continue;
+                /*
+                $text = $handler->extract_text($file);
 
                 //mtrace($resource->name);
                 //mtrace($text);
+                //mtrace(var_export());
 
                 // TODO: 2. LLM
-                //generate_questions($text, $openaiapikey);
+                generate_questions($text, $openaiapikey);
 
                 // TODO: 3. Create question bank category and questions
-                /*
-                $category = create_question_category($context->id, 'Test');
-
                 $question = (object) [
                     "stem" => "What is the capital of France?",
                     "answers" => [
@@ -84,11 +98,7 @@ class generation_task extends \core\task\adhoc_task {
 
                 create_question("Q001", $question, $category);
                 */
-                
             }
         }
-
-        //mtrace(var_export());
     }
-
 }

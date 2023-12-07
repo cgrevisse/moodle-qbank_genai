@@ -14,7 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
+/**
+ * Package for text extraction file handlers.
+ *
+ * @copyright  2023 Christian Grévisse <christian.grevisse@uni.lu>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace qbank_genai\handler;
+
+defined('MOODLE_INTERNAL') || die();
 
 use stdClass;
 
@@ -22,15 +32,13 @@ use stdClass;
  * Base Class FileHandler for text extraction.
  *
  * @package    qbank_genai
- * @copyright  2023 Christian Grévisse <christian.grevisse@uni.lu>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class FileHandler {
 
     /**
      * Abstract method for extracting text from a file.
-     * 
-     * @param stdClass The file
+     *
+     * @param stdClass $file The file
      * @return string The extracted text
      */
     abstract public function extract_text(stdClass $file): string;
@@ -38,9 +46,17 @@ abstract class FileHandler {
 
 /**
  * Text extraction handler for PDF files which uses the smalot/pdfparser.
+ *
+ * @package    qbank_genai
  */
 class PDFHandler extends FileHandler {
 
+    /**
+     * Extracting text from a PDF file.
+     *
+     * @param stdClass $file The file
+     * @return string The extracted text
+     */
     public function extract_text(stdClass $file): string {
         raise_memory_limit(MEMORY_HUGE);
 
@@ -56,16 +72,18 @@ class PDFHandler extends FileHandler {
 
 /**
  * Registry for file handlers.
+ *
+ * @package    qbank_genai
  */
 class HandlerRegistry {
 
     /**
-     * Singleton instance
+     * @var static $instance Singleton instance
      */
     private static $instance = null;
 
     /**
-     * Registered handlers
+     * @var static $handlers Registered handlers
      */
     private static $handlers = null;
 
@@ -80,7 +98,7 @@ class HandlerRegistry {
 
     /**
      * Singleton instance getter.
-     * 
+     *
      * @return HandlerRegistry The singleton registry instance
      */
     public static function get_registry() {
@@ -93,16 +111,16 @@ class HandlerRegistry {
 
     /**
      * Returns the file types for which a file handler is registered.
-     * 
-     * @return string[] The file types 
+     *
+     * @return string[] The file types
      */
     public function get_supported_types() {
         return array_keys(self::$handlers);
     }
-    
+
     /**
      * Returns the handler registered for the file type (if any)
-     * 
+     *
      * @param string $type The file type
      * @return FileHandler The corresponding handler or null
      */

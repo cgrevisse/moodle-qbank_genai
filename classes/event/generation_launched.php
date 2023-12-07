@@ -35,15 +35,25 @@ class generation_launched extends \core\event\base {
         $this->data['edulevel'] = self::LEVEL_TEACHING;
     }
 
+    /**
+     * Event name.
+     *
+     * @return string
+     */
     public static function get_name() {
         return "Question generation launched";
     }
 
+    /**
+     * Event description.
+     *
+     * @return string
+     */
     public function get_description() {
         if (!array_key_exists('ids', $this->data['other'])) {
             return "";
         }
-        
+
         $ids = implode(", ", $this->data['other']['ids']);
         return "The user with id '{$this->data['userid']}' launched the generation task for resources with ids {$ids}.";
     }
