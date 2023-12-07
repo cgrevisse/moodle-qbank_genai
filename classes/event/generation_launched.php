@@ -16,6 +16,8 @@
 
 namespace qbank_genai\event;
 
+use core\session\exception;
+
 /**
  * Event generation_launched
  *
@@ -38,6 +40,11 @@ class generation_launched extends \core\event\base {
     }
 
     public function get_description() {
-        return "Foo: ".$this->data['other']['foo'];
+        if (!array_key_exists('ids', $this->data['other'])) {
+            return "";
+        }
+        
+        $ids = implode(", ", $this->data['other']['ids']);
+        return "The user with id '{$this->data['userid']}' launched the generation task for resources with ids {$ids}.";
     }
 }

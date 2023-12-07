@@ -16,9 +16,11 @@
 
 namespace qbank_genai\form;
 
-use moodleform;
-
 require_once("$CFG->libdir/formslib.php");
+require_once($CFG->dirroot. '/question/bank/genai/classes/handler/handler.php');
+
+use moodleform;
+use qbank_genai\handler\HandlerRegistry;
 
 /**
  * Class generation_form
@@ -32,20 +34,39 @@ class generation_form extends moodleform {
     public function definition() {
         $mform = $this->_form;
 
+        $supported_types = HandlerRegistry::get_registry()->get_supported_types();
+
         // add a checkbox controller for all checkboxes in `group => 1`: (necessary for select all/none)
         $this->add_checkbox_controller(1);
 
-        foreach ($this->_customdata as $r) {
-            $resource = (object) $r;
-            $mform->addElement('advcheckbox', 'resource_'.$resource->id, $resource->name, null, ['group' => 1, 'class' => $resource->visible ? 'text-primary' : 'text-secondary'], [0, $resource->id]);
-        }
+        foreach ($this->_customdata as $resource) {
+            $fileinfo = get_fileinfo_for_resource($resource->id);
 
+            if (in_array($fileinfo->extension, $supported_types)) {
+                $mform->addElement('advcheckbox', "resource[{$resource->id}]", $resource->name, null, ['group' => 1, 'class' => $resource->visible ? 'text-primary' : 'text-body-secondary']);
+            }
+        }
+        
         $this->add_action_buttons(false, get_string('title', 'qbank_genai'));
     }
     
     function validation($data, $files) {
-        // Custom validation should be added here.
-        return [];
+        $errors = [];
+        
+        // make sure at least one file is selected!
+        $noneselected = true;
+
+        foreach($data["resource"] as $id => $selected) {
+            if (boolval($selected)) {
+                $noneselected = false;
+            }
+        }
+        
+        if ($noneselected) {
+            $errors["resource"] = get_string('errormsg_noneselected', 'qbank_genai');
+        }
+
+        return $errors;
     }
 
 }

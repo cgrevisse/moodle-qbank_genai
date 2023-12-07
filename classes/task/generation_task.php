@@ -16,7 +16,12 @@
 
 namespace qbank_genai\task;
 
-defined('MOODLE_INTERNAL') || die();
+require_once($CFG->dirroot. '/question/bank/genai/lib.php');
+require_once($CFG->dirroot. '/question/bank/genai/classes/handler/handler.php');
+require_once($CFG->dirroot . '/question/bank/genai/vendor/autoload.php');
+
+use qbank_genai\handler\HandlerRegistry;
+use stdClass;
 
 /**
  * Class generation_task
@@ -27,26 +32,63 @@ defined('MOODLE_INTERNAL') || die();
  */
 class generation_task extends \core\task\adhoc_task {
 
-    public static function instance(
-        int $id,
-        string $status,
-        int $userid,
-    ): self {
+    public static function instance(array $resources, int $userid, int $contextid) {
         $task = new self();
         $task->set_custom_data((object) [
-            'id' => $id,
-            'status' => $status,
+            'resources' => $resources,
+            'contextid' => $contextid,
         ]);
-        global $USER;
         $task->set_userid($userid);
 
         return $task;
     }
 
     public function execute() {
+        $openaiapikey = get_config('qbank_genai', 'openaiapikey');
+        if (empty($openaiapikey)) {
+            throw new \Exception('No OpenAI API key provided.');
+        }
+
         $data = $this->get_custom_data();
-        mtrace($data->id);
-        sleep(20);
-        mtrace($data->status);
+
+        $category = create_question_category($data->contextid, get_resource_names_string($data->resources));
+
+        foreach ($data->resources as $resource) {
+            // 1. Extract text from PDF
+            $file = get_fileinfo_for_resource($resource->id);
+        
+            $handler = HandlerRegistry::get_registry()->get_handler($file->extension);
+        
+            if ($handler != null) {
+                //$text = $handler->extract_text($file);
+
+                //mtrace($resource->name);
+                //mtrace($text);
+
+                // TODO: 2. LLM
+                //generate_questions($text, $openaiapikey);
+
+                // TODO: 3. Create question bank category and questions
+                /*
+                $category = create_question_category($context->id, 'Test');
+
+                $question = (object) [
+                    "stem" => "What is the capital of France?",
+                    "answers" => [
+                        (object) ["text" => "Paris", "weight" => 1.0],
+                        (object) ["text" => "Strasbourg", "weight" => 0.0],
+                        (object) ["text" => "Lyon", "weight" => 0.0],
+                        (object) ["text" => "Marseille", "weight" => 0.0],
+                    ],
+                ];
+
+                create_question("Q001", $question, $category);
+                */
+                
+            }
+        }
+
+        //mtrace(var_export());
     }
+
 }

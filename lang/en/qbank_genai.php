@@ -31,3 +31,7 @@ $string['title'] = 'Generate questions';
 
 $string['openaiapikey'] = 'OpenAI API key';
 $string['openaiapikeydesc'] = 'To be created at <a href="https://platform.openai.com/api-keys" target="_blank">https://platform.openai.com/api-keys</a>.';
+
+$string['errormsg_noneselected'] = 'Please select at least one resource.';
+$string['ongoingtasks'] = 'The following generation tasks are ongoing:';
+$string['noopenaiapikey'] = 'You have not set an OpenAI API key so far. Please refer to the plugin settings.';
