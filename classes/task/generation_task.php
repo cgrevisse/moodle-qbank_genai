@@ -85,7 +85,7 @@ class generation_task extends \core\task\adhoc_task {
                 // TODO: 2. LLM
                 generate_questions($text, $openaiapikey);
 
-                // TODO: 3. Create question bank category and questions
+                // 3. Create question bank category and questions
                 $question = (object) [
                     "stem" => "What is the capital of France?",
                     "answers" => [

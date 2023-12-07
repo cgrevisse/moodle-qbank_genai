@@ -15,14 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * TODO describe file index
+ * Index file of the GenAI question generation plugin.
  *
  * @package    qbank_genai
  * @copyright  2023 Christian Grévisse <christian.grevisse@uni.lu>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-use qbank_genai\task\generation_task;
 
 require('../../../config.php');
 require_once($CFG->dirroot.'/question/bank/genai/lib.php');
