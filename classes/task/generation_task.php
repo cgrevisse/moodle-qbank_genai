@@ -63,42 +63,118 @@ class generation_task extends \core\task\adhoc_task {
             throw new \Exception('No OpenAI API key provided.');
         }
 
+        $assistantid = get_config('qbank_genai', 'assistantid');
+        if (empty($assistantid)) {
+            $assistantid = create_openai_assistant($openaiapikey);
+            set_config("assistantid", $assistantid, "qbank_genai");
+        }
+
+        $client = \OpenAI::client($openaiapikey);
+
         $data = $this->get_custom_data();
 
         $category = create_question_category($data->contextid, get_resource_names_string($data->resources));
+        mtrace("Category created: ".$category->name);
 
         foreach ($data->resources as $resource) {
-            // 1. Extract text from PDF
             $file = get_fileinfo_for_resource($resource->id);
 
+            /*
+            // Extract text from PDF (not necessary if using OpenAPI's Assistants API)
             $handler = HandlerRegistry::get_registry()->get_handler($file->extension);
 
             if ($handler != null) {
                 continue;
-                /*
                 $text = $handler->extract_text($file);
+
+                generate_questions($text, $openaiapikey);
 
                 //mtrace($resource->name);
                 //mtrace($text);
                 //mtrace(var_export());
-
-                // TODO: 2. LLM
-                generate_questions($text, $openaiapikey);
-
-                // 3. Create question bank category and questions
-                $question = (object) [
-                    "stem" => "What is the capital of France?",
-                    "answers" => [
-                        (object) ["text" => "Paris", "weight" => 1.0],
-                        (object) ["text" => "Strasbourg", "weight" => 0.0],
-                        (object) ["text" => "Lyon", "weight" => 0.0],
-                        (object) ["text" => "Marseille", "weight" => 0.0],
-                    ],
-                ];
-
-                create_question("Q001", $question, $category);
-                */
             }
+            */
+
+            // Upload files
+            $response = $client->files()->upload([
+                'purpose' => 'assistants',
+                'file' => fopen($file->path, 'r'),
+            ]);
+
+            $fileid = $response->id;
+
+            mtrace("File uploaded: $fileid");
+        
+            // Create a Thread
+            $response = $client->threads()->create([]);
+            $threadid = $response->id;
+
+            mtrace("Thread created: $threadid");
+
+            // Add a Message to a Thread
+            $response = $client->threads()->messages()->create($threadid, [
+                'role' => 'user',
+                'content' => 'Create 10 multiple choice questions for the provided file. Each question shall have 4 answers and only 1 correct answer. The output shall be in JSON format, i.e., an array of objects where each object contains the stem, an array for the answers and the index of the correct answer. Name the keys `stem`, `answers`, `correctAnswerIndex`. The output shall only contain the JSON, nothing else.',
+                'file_ids' => [$fileid],
+            ]);
+            $messageid = $response->id; 
+
+            mtrace("Message created: $messageid");
+
+            // Run the Assistant
+            $response = $client->threads()->runs()->create($threadid, ['assistant_id' => $assistantid]);
+            $runid = $response->id;
+
+            mtrace("Run created: $runid");
+
+            // Poll for status (until OpenAI develops some streaming approach ...)
+            do {
+                sleep(1);
+                $response = $client->threads()->runs()->retrieve($threadid, $runid);
+                $status = $response->status;
+            } while($status != 'completed' && $status != 'failed');
+
+            if($status == 'failed') {
+                throw new \Exception('Error during run, check task logs for further details.');
+                mtrace("Error during run:");
+                mtrace(var_export($response->lastError->toArray()));
+            }
+
+            // Completed: Get the Assistant's Response
+            mtrace("Run completed!");
+
+            $response = $client->threads()->messages()->list($threadid, ['limit' => 1]);
+            $questiondata = json_decode(trim($response->data[0]->content[0]->text->value, '`json'));
+
+            // Create question bank category and questions
+            $response = $client->threads()->messages()->list($threadid, ['limit' => 1]);
+            $questiondata = json_decode(trim($response->data[0]->content[0]->text->value, '`json'));
+
+            $i = 0;
+
+            foreach ($questiondata as $data) {
+                mtrace(var_export($data));
+
+                $question = new \stdClass();
+                $question->stem = $data->stem;
+                $question->answers = [];
+
+                foreach ($data->answers as $answer) {
+                    $question->answers[] = (object) ["text" => $answer, "weight" => 0.0];
+                }
+
+                $question->answers[$data->correctAnswerIndex]->weight = 1.0;
+
+                $questionname = str_pad(strval(++$i), 3, "0", STR_PAD_LEFT);
+
+                create_question($questionname, $question, $category);
+
+                mtrace("Question created: $questionname");
+            }
+
+            // Delete the file
+            $response = $client->files()->delete($fileid);
+            mtrace("File deleted!");
         }
     }
 }

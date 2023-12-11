@@ -94,6 +94,25 @@ function get_fileinfo_for_resource(int $resourceid) {
 }
 
 /**
+ * Creates an OpenAI Assistant.
+ *
+ * @param string $apikey OpenAI API key
+ * @return int ID the created assistant
+ */
+function create_openai_assistant(string $apikey) {
+    $client = OpenAI::client($apikey);
+
+    $response = $client->assistants()->create([
+        'name' => 'MCQ Generator',
+        'instructions' => 'You create multiple-choice questions about the files that you will receive.',
+        'model' => 'gpt-4-1106-preview',
+        'tools' => [['type' => 'retrieval']],
+    ]);
+    
+    return $response->id;
+}
+
+/**
  * Generate questions about the given text
  *
  * @param string $text The text

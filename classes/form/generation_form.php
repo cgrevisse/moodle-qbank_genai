@@ -47,7 +47,7 @@ class generation_form extends moodleform {
         foreach ($this->_customdata as $resource) {
             $fileinfo = get_fileinfo_for_resource($resource->id);
 
-            if (in_array($fileinfo->extension, $supportedtypes)) {
+            if (true || in_array($fileinfo->extension, $supportedtypes)) {
                 $attributes = ['group' => 1, 'class' => $resource->visible ? 'text-primary' : 'text-body-secondary'];
                 $mform->addElement('advcheckbox', "resource[{$resource->id}]", $resource->name, null, $attributes);
             }
