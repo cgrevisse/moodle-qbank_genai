@@ -19,10 +19,8 @@ namespace qbank_genai\form;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->dirroot.'/question/bank/genai/classes/handler/handler.php');
 
 use moodleform;
-use qbank_genai\handler\HandlerRegistry;
 
 /**
  * Class generation_form
@@ -39,18 +37,16 @@ class generation_form extends moodleform {
     public function definition() {
         $mform = $this->_form;
 
-        $supportedtypes = HandlerRegistry::get_registry()->get_supported_types();
-
         // Add a checkbox controller for all checkboxes in `group => 1`: (necessary for select all/none).
         $this->add_checkbox_controller(1);
 
         foreach ($this->_customdata as $resource) {
-            $fileinfo = get_fileinfo_for_resource($resource->id);
-
-            if (true || in_array($fileinfo->extension, $supportedtypes)) {
-                $attributes = ['group' => 1, 'class' => $resource->visible ? 'text-primary' : 'text-body-secondary'];
-                $mform->addElement('advcheckbox', "resource[{$resource->id}]", $resource->name, null, $attributes);
+            if ($resource->deletioninprogress) {
+                continue;
             }
+
+            $attributes = ['group' => 1, 'class' => $resource->visible ? 'text-primary' : 'text-body-secondary'];
+            $mform->addElement('advcheckbox', "resource[{$resource->id}]", $resource->name, null, $attributes);
         }
 
         $this->add_action_buttons(false, get_string('title', 'qbank_genai'));

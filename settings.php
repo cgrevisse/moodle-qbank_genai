@@ -37,9 +37,9 @@ if ($hassiteconfig) {
         ));
 
         $settings->add(new admin_setting_configtext(
-            'qbank_genai/assistantid', 
-            new lang_string('assistantid', 'qbank_genai'), 
-            new lang_string('assistantiddesc', 'qbank_genai'), 
+            'qbank_genai/assistantid',
+            new lang_string('assistantid', 'qbank_genai'),
+            new lang_string('assistantiddesc', 'qbank_genai'),
             '',
         ));
     }

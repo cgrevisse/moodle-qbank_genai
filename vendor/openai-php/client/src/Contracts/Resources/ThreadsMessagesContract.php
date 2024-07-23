@@ -34,9 +34,9 @@ interface ThreadsMessagesContract
     public function modify(string $threadId, string $messageId, array $parameters): ThreadMessageResponse;
 
     /**
-     * Delete a message.
+     * Deletes a message.
      *
-     * @see TBD - there is no documentation yet
+     * @see https://platform.openai.com/docs/api-reference/messages/deleteMessage
      */
     public function delete(string $threadId, string $messageId): ThreadMessageDeleteResponse;
 
@@ -48,11 +48,4 @@ interface ThreadsMessagesContract
      * @param  array<string, mixed>  $parameters
      */
     public function list(string $threadId, array $parameters = []): ThreadMessageListResponse;
-
-    /**
-     * Manage files attached to a thread message.
-     *
-     * @see https://platform.openai.com/docs/api-reference/messages/file-object
-     */
-    public function files(): ThreadsMessagesFilesContract;
 }

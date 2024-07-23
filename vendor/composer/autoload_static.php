@@ -8,14 +8,12 @@ class ComposerStaticInit3ffbe28fb745b145fa2fcd19500ebf5e
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
-        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '61ba3e92ef91a7a0f1cc260ebd9290e4' => __DIR__ . '/..' . '/openai-php/client/src/OpenAI.php',
     );
 
     public static $prefixLengthsPsr4 = array (
         'S' => 
         array (
-            'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Contracts\\Service\\' => 26,
             'Symfony\\Contracts\\HttpClient\\' => 29,
             'Symfony\\Component\\HttpClient\\' => 29,
@@ -43,10 +41,6 @@ class ComposerStaticInit3ffbe28fb745b145fa2fcd19500ebf5e
     );
 
     public static $prefixDirsPsr4 = array (
-        'Symfony\\Polyfill\\Mbstring\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
-        ),
         'Symfony\\Contracts\\Service\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/service-contracts',
@@ -65,8 +59,8 @@ class ComposerStaticInit3ffbe28fb745b145fa2fcd19500ebf5e
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
-            1 => __DIR__ . '/..' . '/psr/http-factory/src',
+            0 => __DIR__ . '/..' . '/psr/http-factory/src',
+            1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -94,16 +88,6 @@ class ComposerStaticInit3ffbe28fb745b145fa2fcd19500ebf5e
         ),
     );
 
-    public static $prefixesPsr0 = array (
-        'S' => 
-        array (
-            'Smalot\\PdfParser\\' => 
-            array (
-                0 => __DIR__ . '/..' . '/smalot/pdfparser/src',
-            ),
-        ),
-    );
-
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
@@ -113,7 +97,6 @@ class ComposerStaticInit3ffbe28fb745b145fa2fcd19500ebf5e
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit3ffbe28fb745b145fa2fcd19500ebf5e::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit3ffbe28fb745b145fa2fcd19500ebf5e::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit3ffbe28fb745b145fa2fcd19500ebf5e::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit3ffbe28fb745b145fa2fcd19500ebf5e::$classMap;
 
         }, null, ClassLoader::class);

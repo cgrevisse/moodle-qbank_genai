@@ -19,10 +19,7 @@ namespace qbank_genai\task;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot.'/question/bank/genai/lib.php');
-require_once($CFG->dirroot.'/question/bank/genai/classes/handler/handler.php');
 require_once($CFG->dirroot.'/question/bank/genai/vendor/autoload.php');
-
-use qbank_genai\handler\HandlerRegistry;
 
 /**
  * Class generation_task
@@ -79,76 +76,81 @@ class generation_task extends \core\task\adhoc_task {
         foreach ($data->resources as $resource) {
             $file = get_fileinfo_for_resource($resource->id);
 
-            /*
-            // Extract text from PDF (not necessary if using OpenAPI's Assistants API)
-            $handler = HandlerRegistry::get_registry()->get_handler($file->extension);
+            mtrace("Uploading file:");
+            mtrace($file->path);
 
-            if ($handler != null) {
-                continue;
-                $text = $handler->extract_text($file);
+            // Upload files: Copy necessary as Moodle renames files upon upload and OpenAI requires
+            // a file extension (and symbolic link would still take original name).
+            $copypath = $file->path.".".$file->extension;
+            copy($file->path, $copypath);
 
-                generate_questions($text, $openaiapikey);
-
-                //mtrace($resource->name);
-                //mtrace($text);
-                //mtrace(var_export());
-            }
-            */
-
-            // Upload files
             $response = $client->files()->upload([
                 'purpose' => 'assistants',
-                'file' => fopen($file->path, 'r'),
+                'file' => fopen($copypath, 'r'),
             ]);
+
+            unlink($copypath);
 
             $fileid = $response->id;
 
             mtrace("File uploaded: $fileid");
-        
-            // Create a Thread
-            $response = $client->threads()->create([]);
+
+            // Create vector store.
+            $response = $client->vectorStores()->create([
+                'name' => 'Moodle GenAI Bank Plugin Vector Store', 'file_ids' => [$fileid]]);
+            $vectorstoreid = $response->id;
+
+            mtrace("Vector store created: $vectorstoreid");
+
+            // Create a Thread.
+            $response = $client->threads()->create([
+                'tool_resources' => ['file_search' => ['vector_store_ids' => [$vectorstoreid]]]]);
             $threadid = $response->id;
 
             mtrace("Thread created: $threadid");
 
-            // Add a Message to a Thread
+            // Add a Message to a Thread.
+            $message = 'Create 10 multiple choice questions for the provided file. ';
+            $message .= 'Each question shall have 4 answers and only 1 correct answer. ';
+            $message .= 'The output shall be in JSON format, i.e., an array of objects where each object contains the stem, ';
+            $message .= 'an array for the answers and the index of the correct answer. Name the keys "stem", "answers", ';
+            $message .= '"correctAnswerIndex". The output shall only contain the JSON, nothing else.';
+
             $response = $client->threads()->messages()->create($threadid, [
                 'role' => 'user',
-                'content' => 'Create 10 multiple choice questions for the provided file. Each question shall have 4 answers and only 1 correct answer. The output shall be in JSON format, i.e., an array of objects where each object contains the stem, an array for the answers and the index of the correct answer. Name the keys `stem`, `answers`, `correctAnswerIndex`. The output shall only contain the JSON, nothing else.',
-                'file_ids' => [$fileid],
+                'content' => $message,
             ]);
-            $messageid = $response->id; 
+            $messageid = $response->id;
 
             mtrace("Message created: $messageid");
 
-            // Run the Assistant
+            // Run the Assistant.
             $response = $client->threads()->runs()->create($threadid, ['assistant_id' => $assistantid]);
             $runid = $response->id;
 
             mtrace("Run created: $runid");
 
-            // Poll for status (until OpenAI develops some streaming approach ...)
+            // Poll for status -> TODO: Streaming?
             do {
                 sleep(1);
                 $response = $client->threads()->runs()->retrieve($threadid, $runid);
                 $status = $response->status;
-            } while($status != 'completed' && $status != 'failed');
+            } while ($status != 'completed' && $status != 'failed');
 
-            if($status == 'failed') {
+            if ($status == 'failed') {
                 throw new \Exception('Error during run, check task logs for further details.');
                 mtrace("Error during run:");
                 mtrace(var_export($response->lastError->toArray()));
             }
 
-            // Completed: Get the Assistant's Response
+            // Completed: Get the Assistant's Response.
             mtrace("Run completed!");
 
+            // Create question bank category and questions.
             $response = $client->threads()->messages()->list($threadid, ['limit' => 1]);
             $questiondata = json_decode(trim($response->data[0]->content[0]->text->value, '`json'));
 
-            // Create question bank category and questions
-            $response = $client->threads()->messages()->list($threadid, ['limit' => 1]);
-            $questiondata = json_decode(trim($response->data[0]->content[0]->text->value, '`json'));
+            mtrace(var_export($response->data));
 
             $i = 0;
 
@@ -172,7 +174,11 @@ class generation_task extends \core\task\adhoc_task {
                 mtrace("Question created: $questionname");
             }
 
-            // Delete the file
+            // Delete vector store.
+            $response = $client->vectorStores()->delete($vectorstoreid);
+            mtrace("Vector store deleted!");
+
+            // Delete the file.
             $response = $client->files()->delete($fileid);
             mtrace("File deleted!");
         }

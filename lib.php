@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * Callback implementations for Generative AI Question Bank
  *
@@ -105,36 +104,11 @@ function create_openai_assistant(string $apikey) {
     $response = $client->assistants()->create([
         'name' => 'MCQ Generator',
         'instructions' => 'You create multiple-choice questions about the files that you will receive.',
-        'model' => 'gpt-4-1106-preview',
-        'tools' => [['type' => 'retrieval']],
+        'model' => 'gpt-4o',
+        'tools' => [['type' => 'file_search']],
     ]);
-    
+
     return $response->id;
-}
-
-/**
- * Generate questions about the given text
- *
- * @param string $text The text
- * @param string $apikey OpenAI API key
- */
-function generate_questions(string $text, string $apikey) {
-    // TODO: LLM-based question generation.
-
-    /*
-    // Basic usage of OpenAI API Client (https://github.com/openai-php/client)
-
-    $client = OpenAI::client($openaiapikey);
-
-    $result = $client->chat()->create([
-        'model' => 'gpt-4',
-        'messages' => [
-            ['role' => 'user', 'content' => 'What is the Collège de France?'],
-        ],
-    ]);
-
-    echo $result->choices[0]->message->content;
-    */
 }
 
 /**
@@ -196,7 +170,7 @@ function create_question(string $name, stdClass $question, stdClass $category) {
     $qdata->length = 1;
     $qdata->defaultmark = 1;
     $qdata->penalty = 0;
-    $qdata->questiontext = $question->stem; // TODO: Cleanse.
+    $qdata->questiontext = $question->stem; // FIXME: Cleanse.
     $qdata->questiontextformat = FORMAT_HTML;
     $qdata->generalfeedback = '';
     $qdata->generalfeedbackformat = FORMAT_HTML;
@@ -231,7 +205,7 @@ function create_question(string $name, stdClass $question, stdClass $category) {
     foreach ($question->answers as $a) {
         $answer = new stdClass();
         $answer->question = $qdata->id;
-        $answer->answer = $a->text; // TODO: Cleanse.
+        $answer->answer = $a->text; // FIXME: Cleanse.
         $answer->answerformat = FORMAT_HTML;
         $answer->feedback = '';
         $answer->feedbackformat = FORMAT_HTML;
