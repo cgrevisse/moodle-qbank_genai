@@ -62,7 +62,7 @@ function qbank_genai_extend_navigation_course(navigation_node $navigation, stdCl
  */
 function get_course_resources(stdClass $course) {
     $info = get_fast_modinfo($course);
-    return $info->instances['resource'];
+    return $info->instances['resource'] ?? [];
 }
 
 /**

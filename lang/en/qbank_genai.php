@@ -31,6 +31,7 @@ $string['assistantiddesc'] = 'ID concerning the <a href="https://platform.openai
 $string['errormsg_noneselected'] = 'Please select at least one resource.';
 
 $string['noopenaiapikey'] = 'You have not set an OpenAI API key so far. Please refer to the plugin settings.';
+$string['noresources'] = 'There are no resources in your course.';
 
 $string['ongoingtasks'] = 'The following generation tasks are ongoing:';
 

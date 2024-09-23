@@ -80,43 +80,49 @@ if (!empty($existingtasks)) {
 // Get course resources.
 $resources = get_course_resources($course);
 
-// Form handling.
-$mform = new \qbank_genai\form\generation_form($url, $resources);
-
-if ($fromform = $mform->get_data()) {
-    $ids = [];
-
-    foreach ($fromform->resource as $id => $selected) {
-        if (boolval($selected)) {
-            $ids[] = $id;
-        }
-    }
-
-    $selectedresources = [];
-
-    foreach ($resources as $resource) {
-        if (in_array($resource->id, $ids)) {
-            $selectedresources[] = (object) [
-                "id" => $resource->id,
-                "name" => $resource->name,
-                "visible" => $resource->visible,
-            ];
-        }
-    }
-
-    // Launch generation task.
-    $task = \qbank_genai\task\generation_task::instance($selectedresources, $USER->id, $context->id);
-    \core\task\manager::queue_adhoc_task($task); // Add true to avoid duplicates.
-
-    // Log generation task launched.
-    $event = \qbank_genai\event\generation_launched::create(['context' => $context, 'other' => ["ids" => $ids]]);
-    $event->trigger();
-
-    // Redirect to this page again (seems to interfere with mtrace in adhoc task ...).
-    // Also, consider redirecting before any $OUTPUT->...
-    redirect($PAGE->url);
+if (count($resources) == 0) {
+    echo html_writer::start_tag('div', ['class' => 'alert alert-warning']);
+    echo html_writer::tag('p', get_string('noresources', 'qbank_genai'));
+    echo html_writer::end_tag('div');
 } else {
-    $mform->display();
+    // Form handling.
+    $mform = new \qbank_genai\form\generation_form($url, $resources);
+
+    if ($fromform = $mform->get_data()) {
+        $ids = [];
+
+        foreach ($fromform->resource as $id => $selected) {
+            if (boolval($selected)) {
+                $ids[] = $id;
+            }
+        }
+
+        $selectedresources = [];
+
+        foreach ($resources as $resource) {
+            if (in_array($resource->id, $ids)) {
+                $selectedresources[] = (object) [
+                    "id" => $resource->id,
+                    "name" => $resource->name,
+                    "visible" => $resource->visible,
+                ];
+            }
+        }
+
+        // Launch generation task.
+        $task = \qbank_genai\task\generation_task::instance($selectedresources, $USER->id, $context->id);
+        \core\task\manager::queue_adhoc_task($task); // Add true to avoid duplicates.
+
+        // Log generation task launched.
+        $event = \qbank_genai\event\generation_launched::create(['context' => $context, 'other' => ["ids" => $ids]]);
+        $event->trigger();
+
+        // Redirect to this page again (seems to interfere with mtrace in adhoc task ...).
+        // Also, consider redirecting before any $OUTPUT->...
+        redirect($PAGE->url);
+    } else {
+        $mform->display();
+    }
 }
 
 echo $OUTPUT->footer();
