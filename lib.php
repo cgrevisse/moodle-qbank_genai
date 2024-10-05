@@ -31,7 +31,7 @@ require_once($CFG->libdir.'/questionlib.php'); // Needed for get_next_version().
  *
  * @return array The necessary capabilities
  */
-function required_capabilities() {
+function qbank_genai_required_capabilities() {
     return ['moodle/question:add', 'moodle/course:viewhiddenactivities'];
 }
 
@@ -43,7 +43,7 @@ function required_capabilities() {
  * @param context $context Course context
  */
 function qbank_genai_extend_navigation_course(navigation_node $navigation, stdClass $course, context $context) {
-    if (!isloggedin() || isguestuser() || !has_all_capabilities(required_capabilities(), $context)) {
+    if (!isloggedin() || isguestuser() || !has_all_capabilities(qbank_genai_required_capabilities(), $context)) {
         return;
     }
 
@@ -60,7 +60,7 @@ function qbank_genai_extend_navigation_course(navigation_node $navigation, stdCl
  * @param stdClass $course The course
  * @return cm_info[] The resources
  */
-function get_course_resources(stdClass $course) {
+function qbank_genai_get_course_resources(stdClass $course) {
     $info = get_fast_modinfo($course);
     return $info->instances['resource'] ?? [];
 }
@@ -71,7 +71,7 @@ function get_course_resources(stdClass $course) {
  * @param int $resourceid The ID of the resource
  * @return stdClass The file info
  */
-function get_fileinfo_for_resource(int $resourceid) {
+function qbank_genai_get_fileinfo_for_resource(int $resourceid) {
     $fs = get_file_storage();
     $cmid = context_module::instance($resourceid)->id;
     $files = $fs->get_area_files($cmid, 'mod_resource', 'content', 0, 'filename', false);
@@ -98,7 +98,7 @@ function get_fileinfo_for_resource(int $resourceid) {
  * @param string $apikey OpenAI API key
  * @return int ID the created assistant
  */
-function create_openai_assistant(string $apikey) {
+function qbank_genai_create_openai_assistant(string $apikey) {
     $client = OpenAI::client($apikey);
 
     $response = $client->assistants()->create([
@@ -118,7 +118,7 @@ function create_openai_assistant(string $apikey) {
  * @param string $resourcedescription The description about the resources for which questions are generated
  * @return stdClass Record of the new question category
  */
-function create_question_category(int $courseid, string $resourcedescription) {
+function qbank_genai_create_question_category(int $courseid, string $resourcedescription) {
     global $DB;
 
     $record = [
@@ -142,7 +142,7 @@ function create_question_category(int $courseid, string $resourcedescription) {
  * @param stdClass[] $resources Array of resources
  * @return string The description string
  */
-function get_resource_names_string($resources) {
+function qbank_genai_get_resource_names_string($resources) {
     return implode(", ", array_map(fn($r): string => $r->name, $resources));
 }
 
@@ -156,7 +156,7 @@ function get_resource_names_string($resources) {
  * @param stdClass $question The MCQ data
  * @param stdClass $category Information about the category and context
  */
-function create_question(string $name, stdClass $question, stdClass $category) {
+function qbank_genai_create_question(string $name, stdClass $question, stdClass $category) {
     global $USER, $DB;
 
     $transaction = $DB->start_delegated_transaction();

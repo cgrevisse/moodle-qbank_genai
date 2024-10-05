@@ -62,7 +62,7 @@ class generation_task extends \core\task\adhoc_task {
 
         $assistantid = get_config('qbank_genai', 'assistantid');
         if (empty($assistantid)) {
-            $assistantid = create_openai_assistant($openaiapikey);
+            $assistantid = qbank_genai_create_openai_assistant($openaiapikey);
             set_config("assistantid", $assistantid, "qbank_genai");
         }
 
@@ -70,11 +70,11 @@ class generation_task extends \core\task\adhoc_task {
 
         $data = $this->get_custom_data();
 
-        $category = create_question_category($data->contextid, get_resource_names_string($data->resources));
+        $category = qbank_genai_create_question_category($data->contextid, qbank_genai_get_resource_names_string($data->resources));
         mtrace("Category created: ".$category->name);
 
         foreach ($data->resources as $resource) {
-            $file = get_fileinfo_for_resource($resource->id);
+            $file = qbank_genai_get_fileinfo_for_resource($resource->id);
 
             mtrace("Uploading file:");
             mtrace($file->path);
@@ -169,7 +169,7 @@ class generation_task extends \core\task\adhoc_task {
 
                 $questionname = str_pad(strval(++$i), 3, "0", STR_PAD_LEFT);
 
-                create_question($questionname, $question, $category);
+                qbank_genai_create_question($questionname, $question, $category);
 
                 mtrace("Question created: $questionname");
             }

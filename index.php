@@ -39,7 +39,7 @@ $course = course_get_format($course)->get_course();
 $context = context_course::instance($course->id);
 $PAGE->set_context($context);
 
-require_all_capabilities(required_capabilities(), $context);
+require_all_capabilities(qbank_genai_required_capabilities(), $context);
 
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('title', 'qbank_genai'));
@@ -66,7 +66,7 @@ if (!empty($existingtasks)) {
 
     foreach ($existingtasks as $task) {
         echo html_writer::start_tag('li');
-        $resourcenames = get_resource_names_string(json_decode($task->customdata)->resources);
+        $resourcenames = qbank_genai_get_resource_names_string(json_decode($task->customdata)->resources);
         echo html_writer::tag('span', format_text($resourcenames, FORMAT_PLAIN));
         echo html_writer::tag('small', userdate($task->timecreated), ['class' => 'text-muted ml-2']);
     }
@@ -78,7 +78,7 @@ if (!empty($existingtasks)) {
 }
 
 // Get course resources.
-$resources = get_course_resources($course);
+$resources = qbank_genai_get_course_resources($course);
 
 if (count($resources) == 0) {
     echo html_writer::start_tag('div', ['class' => 'alert alert-warning']);
