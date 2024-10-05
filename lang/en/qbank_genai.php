@@ -30,6 +30,8 @@ $string['assistantiddesc'] = 'ID concerning the <a href="https://platform.openai
 
 $string['errormsg_noneselected'] = 'Please select at least one resource.';
 
+$string['privacy:metadata'] = 'The GenAI question bank plugin does not store any personal data.';
+
 $string['noopenaiapikey'] = 'You have not set an OpenAI API key so far. Please refer to the plugin settings.';
 $string['noresources'] = 'There are no resources in your course.';
 
