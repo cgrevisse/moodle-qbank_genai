@@ -82,7 +82,7 @@ class generation_task extends \core\task\adhoc_task {
             // Upload files: Copy necessary as Moodle renames files upon upload and OpenAI requires
             // a file extension (and symbolic link would still take original name).
             $copypath = $file->path.".".$file->extension;
-            copy($file->path, $copypath);
+            $file->file->copy_content_to($copypath);
 
             $response = $client->files()->upload([
                 'purpose' => 'assistants',

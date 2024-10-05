@@ -83,6 +83,7 @@ function qbank_genai_get_fileinfo_for_resource(int $resourceid) {
         $path = $fs->get_file_system()->get_remote_path_from_storedfile($file);
 
         return (object) [
+            "file" => $file,
             "name" => $filename,
             "extension" => strtolower($extension),
             "path" => $path,
