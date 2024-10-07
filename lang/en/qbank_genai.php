@@ -30,8 +30,6 @@ $string['assistantiddesc'] = 'ID concerning the <a href="https://platform.openai
 
 $string['errormsg_noneselected'] = 'Please select at least one resource.';
 
-$string['privacy:metadata'] = 'The GenAI question bank plugin does not store any personal data.';
-
 $string['noopenaiapikey'] = 'You have not set an OpenAI API key so far. Please refer to the plugin settings.';
 $string['noresources'] = 'There are no resources in your course.';
 
@@ -41,4 +39,7 @@ $string['openaiapikey'] = 'OpenAI API key';
 $string['openaiapikeydesc'] = 'To be created at <a href="https://platform.openai.com/api-keys" target="_blank">https://platform.openai.com/api-keys</a>.';
 
 $string['pluginname'] = 'Generative AI Question Bank';
+
+$string['privacy:metadata'] = 'The GenAI question bank plugin does not store any personal data.';
+
 $string['title'] = 'Generate questions';
