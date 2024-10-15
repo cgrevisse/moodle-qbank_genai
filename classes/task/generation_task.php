@@ -81,8 +81,11 @@ class generation_task extends \core\task\adhoc_task {
 
             // Upload files: Copy necessary as Moodle renames files upon upload and OpenAI requires
             // a file extension (and symbolic link would still take original name).
-            $copypath = $file->path.".".$file->extension;
+            $tempfolder = make_temp_directory('qbank_genai');
+            $copypath = $tempfolder . "/" . basename($file->path) . "." . $file->extension;
             $file->file->copy_content_to($copypath);
+            mtrace("Temp file created:");
+            mtrace($copypath);
 
             $response = $client->files()->upload([
                 'purpose' => 'assistants',

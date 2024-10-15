@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qbank_genai';
-$plugin->release = '0.1.2';
-$plugin->version = 2024100701;
+$plugin->release = '0.1.3';
+$plugin->version = 2024101501;
 $plugin->requires = 2022112800;
 $plugin->maturity = MATURITY_ALPHA;
