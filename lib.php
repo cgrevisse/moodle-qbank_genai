@@ -43,6 +43,9 @@ function qbank_genai_required_capabilities() {
  * @param context $context Course context
  */
 function qbank_genai_extend_navigation_course(navigation_node $navigation, stdClass $course, context $context) {
+    if (!\core\plugininfo\qbank::is_plugin_enabled('qbank_genai')) {
+        return;
+    }
     if (!isloggedin() || isguestuser() || !has_all_capabilities(qbank_genai_required_capabilities(), $context)) {
         return;
     }
