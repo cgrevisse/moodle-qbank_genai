@@ -47,6 +47,12 @@ $PAGE->set_title(get_string('title', 'qbank_genai'));
 $PAGE->set_heading(format_string($course->fullname));
 
 echo $OUTPUT->header();
+if (!\core\plugininfo\qbank::is_plugin_enabled('qbank_genai')) { // ERN
+        echo $OUTPUT->heading(get_string('title', 'qbank_genai'));
+        echo "<p>Das Plugin ist deaktiviert.</p>";
+        echo $OUTPUT->footer();
+        return;
+}
 
 // Print tertiary navigation.
 $renderer = $PAGE->get_renderer('core_question', 'bank');
