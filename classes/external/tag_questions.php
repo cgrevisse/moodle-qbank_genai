@@ -96,7 +96,7 @@ class tag_questions extends external_api {
 
             // Call OpenAI to get tags.
             $response = $client->responses()->create([
-                'model' => 'gpt-5.4',
+                'model' => 'gpt-6-astra',
                 'input' => [
                     [
                         'role' => 'system',

@@ -77,7 +77,7 @@ class generate_questions extends external_api {
 
         $context = \context_course::instance($courseid);
         self::validate_context($context);
-        require_all_capabilities(qbank_genai_required_capabilities(), $context, null, false);
+        require_all_capabilities(qbank_genai_required_capabilities(), $context);
 
         // Get OpenAI API key from plugin settings.
         $openaiapikey = qbank_genai_get_openai_apikey($courseid);
@@ -122,7 +122,7 @@ class generate_questions extends external_api {
 
         // Call OpenAI to generate questions.
         $response = $client->responses()->create([
-            'model' => 'gpt-5.4',
+            'model' => 'gpt-6-astra',
             'input' => [
                 [
                     'role' => 'system',
