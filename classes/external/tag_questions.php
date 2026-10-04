@@ -134,7 +134,7 @@ class tag_questions extends external_api {
 
             // Parse the response to get the tags.
             try {
-                $tags = json_decode($response->output[0]->content[0]->text)->tags;
+                $tags = json_decode($response->outputText)->tags;
             } catch (\Exception $e) {
                 throw new \Exception(get_string('autotagparsingerror', 'qbank_genai'));
             }
