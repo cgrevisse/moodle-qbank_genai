@@ -38,7 +38,7 @@ $string['numberessays'] = 'Number of essay questions';
 $string['numbermcqs'] = 'Number of multiple choice questions';
 
 $string['openaiapikey'] = 'OpenAI API key';
-$string['openaiapikey_help'] = 'To be created at <a href="https://platform.openai.com/api-keys" target="_blank">https://platform.openai.com/api-keys</a>.';
+$string['openaiapikey_help'] = 'This is the fallback key and will be used if no different key has been set in a course.<br/>Create a key at <a href="https://platform.openai.com/api-keys" target="_blank">https://platform.openai.com/api-keys</a>.';
 $string['openaiapisettings'] = 'OpenAI API Settings';
 
 $string['pluginname'] = 'Generative AI Question Bank';
